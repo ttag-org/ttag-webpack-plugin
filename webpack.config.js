@@ -1,4 +1,5 @@
-const TtagPlugin = require('./plugin');
+const path = require("path")
+const TtagPlugin = require("./plugin");
 
 module.exports = {
   context: __dirname + "/src-example",
@@ -25,6 +26,10 @@ module.exports = {
     ]
   },
   plugins: [
-    new TtagPlugin()
+    new TtagPlugin({
+      translations: {
+        uk: path.join(__dirname, './i18n/uk.po')
+      }
+    })
   ]
 }

@@ -9,23 +9,27 @@ const PLUGIN_NAME = "TtagPlugin";
 const BABEL_LOADER_NAME = 'babel-loader';
 
 class TtagPlugin {
-  constructor() {
+  constructor(options = {}) {
     // Define compilation name and output name
-    this.options_ = {
+    this.options_ = Object.assign({
+      translations: {},
       filename: "[name].ttag.js",
       chunkFilename: "[id].ttag.js",
       additionalPlugins: [],
       excludedPlugins: [PLUGIN_NAME],
-    };
+    }, options);
   }
 
   apply(compiler) {
+    const [locale, pofilePath] = Object.entries(this.options_.translations)[0];
+    const ttagOpts = ['ttag', { resolve: { translations: pofilePath }}];
+
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const outputOptions = deepcopy(compiler.options);
       this.babelLoaderConfigOptions_ = this.getBabelLoaderOptions(outputOptions);
-      this.newConfigOptions_ = this.babelLoaderConfigOptions_; // TODO add ttag
-      // this.newConfigOptions_ = this.makeESMPresetOptions(this.babelLoaderConfigOptions_);
-      outputOptions.output.filename = this.options_.filename;
+      this.babelLoaderConfigOptions_.plugins = [ttagOpts];
+      this.newConfigOptions_ = this.babelLoaderConfigOptions_;
+      outputOptions.output.filename = locale + this.options_.filename;
       outputOptions.output.chunkFilename = this.options_.chunkFilename;
       
       let plugins = (compiler.options.plugins || []).filter(c => this.options_.excludedPlugins.indexOf(c.constructor.name) < 0);
@@ -94,9 +98,7 @@ class TtagPlugin {
             babelLoader = this.getBabelLoader(childCompiler.options);
             babelLoader.options = this.newConfigOptions_;
           });
-          console.log('running childCompiler');
           childCompiler.runAsChild((err, entries, childCompilation) => {
-            console.log('here');
             if (!err) {
               compilation.assets = Object.assign(
                 childCompilation.assets,
