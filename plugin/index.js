@@ -17,7 +17,6 @@ class TtagPlugin {
         translations: {},
         filename: "[name].[locale].js",
         chunkFilename: "[id].[locale].js",
-        additionalPlugins: [],
         excludedPlugins: [PLUGIN_NAME]
       },
       options
@@ -47,9 +46,6 @@ class TtagPlugin {
       let plugins = (compiler.options.plugins || []).filter(
         c => this.options.excludedPlugins.indexOf(c.constructor.name) < 0
       );
-
-      // Add the additionalPlugins
-      plugins = plugins.concat(this.options.additionalPlugins);
 
       /**
        * We are deliberatly not passing plugins in createChildCompiler.

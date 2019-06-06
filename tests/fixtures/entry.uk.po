@@ -10,3 +10,7 @@ msgstr ""
 #: tests/fixtures/entry.js:3
 msgid "test translation"
 msgstr "test translation [translated]"
+
+#: tests/fixtures/entry2.js:3
+msgid "test translation entry 2"
+msgstr "test translation entry 2 [translated]"
