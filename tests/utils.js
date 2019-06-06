@@ -1,4 +1,5 @@
 import webpack from "webpack";
+import deepcopy from "deepcopy";
 import fs from "fs";
 import { NONAME } from "dns";
 
@@ -34,7 +35,7 @@ const defaultConfig = {
 };
 
 export const getCompiler = (ttagPluging, webpackConf = {}) => {
-  const config = Object.assign({}, defaultConfig, webpackConf);
+  const config = deepcopy(Object.assign({}, defaultConfig, webpackConf));
   config.plugins.unshift(ttagPluging);
   return webpack(config);
 };
