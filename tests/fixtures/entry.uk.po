@@ -7,6 +7,6 @@ msgstr ""
 "mime-version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src-example/index.js:3
-msgid "test"
-msgstr "тест"
+#: tests/fixtures/entry.js:3
+msgid "test translation"
+msgstr "test translation [translated]"

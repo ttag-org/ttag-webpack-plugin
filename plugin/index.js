@@ -1,41 +1,55 @@
-const SingleEntryPlugin = require("webpack/lib/SingleEntryPlugin");
-const MultiEntryPlugin = require('webpack/lib/MultiEntryPlugin');
-const SplitChunksPlugin = require('webpack/lib/optimize/SplitChunksPlugin');
-const JsonpTemplatePlugin = require('webpack/lib/web/JsonpTemplatePlugin');
+import SingleEntryPlugin from "webpack/lib/SingleEntryPlugin";
+import MultiEntryPlugin from "webpack/lib/MultiEntryPlugin";
+import SplitChunksPlugin from "webpack/lib/optimize/SplitChunksPlugin";
+import JsonpTemplatePlugin from "webpack/lib/web/JsonpTemplatePlugin";
+import { makeFilename } from "./utils";
 
-const deepcopy = require('deepcopy');
+const deepcopy = require("deepcopy");
 
 const PLUGIN_NAME = "TtagPlugin";
-const BABEL_LOADER_NAME = 'babel-loader';
+const BABEL_LOADER_NAME = "babel-loader";
 
 class TtagPlugin {
   constructor(options = {}) {
     // Define compilation name and output name
-    this.options_ = Object.assign({
-      translations: {},
-      filename: "[name].ttag.js",
-      chunkFilename: "[id].ttag.js",
-      additionalPlugins: [],
-      excludedPlugins: [PLUGIN_NAME],
-    }, options);
+    this.options = Object.assign(
+      {
+        translations: {},
+        filename: "[name].[locale].js",
+        chunkFilename: "[id].[locale].js",
+        additionalPlugins: [],
+        excludedPlugins: [PLUGIN_NAME]
+      },
+      options
+    );
   }
 
-  apply(compiler) {
-    const [locale, pofilePath] = Object.entries(this.options_.translations)[0];
-    const ttagOpts = ['ttag', { resolve: { translations: pofilePath }}];
+  initChildCompiler(compiler, locale, pofilePath) {
+    const ttagOpts = ["ttag", { resolve: { translations: pofilePath } }];
 
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const outputOptions = deepcopy(compiler.options);
-      this.babelLoaderConfigOptions_ = this.getBabelLoaderOptions(outputOptions);
+      this.babelLoaderConfigOptions_ = this.getBabelLoaderOptions(
+        outputOptions
+      );
       this.babelLoaderConfigOptions_.plugins = [ttagOpts];
       this.newConfigOptions_ = this.babelLoaderConfigOptions_;
-      outputOptions.output.filename = locale + this.options_.filename;
-      outputOptions.output.chunkFilename = this.options_.chunkFilename;
-      
-      let plugins = (compiler.options.plugins || []).filter(c => this.options_.excludedPlugins.indexOf(c.constructor.name) < 0);
+
+      outputOptions.output.filename = makeFilename(
+        this.options.filename,
+        locale
+      );
+      outputOptions.output.chunkFilename = makeFilename(
+        this.options.chunkFilename,
+        locale
+      );
+
+      let plugins = (compiler.options.plugins || []).filter(
+        c => this.options.excludedPlugins.indexOf(c.constructor.name) < 0
+      );
 
       // Add the additionalPlugins
-      plugins = plugins.concat(this.options_.additionalPlugins);
+      plugins = plugins.concat(this.options.additionalPlugins);
 
       /**
        * We are deliberatly not passing plugins in createChildCompiler.
@@ -53,7 +67,7 @@ class TtagPlugin {
       childCompiler.context = compiler.context;
       childCompiler.inputFileSystem = compiler.inputFileSystem;
       childCompiler.outputFileSystem = compiler.outputFileSystem;
-      childCompiler.options.module = compiler.options.module
+      childCompiler.options.module = compiler.options.module;
 
       // Call the `apply` method of all plugins by ourselves.
       if (Array.isArray(plugins)) {
@@ -82,10 +96,7 @@ class TtagPlugin {
       if (compiler.options.optimization) {
         if (compiler.options.optimization.splitChunks) {
           new SplitChunksPlugin(
-            Object.assign(
-              {},
-              compiler.options.optimization.splitChunks,
-            )
+            Object.assign({}, compiler.options.optimization.splitChunks)
           ).apply(childCompiler);
         }
       }
@@ -118,6 +129,14 @@ class TtagPlugin {
     });
   }
 
+  apply(compiler) {
+    Object.entries(this.options.translations).forEach(
+      ([locale, pofilePath]) => {
+        this.initChildCompiler(compiler, locale, pofilePath);
+      }
+    );
+  }
+
   getBabelLoader(config) {
     let babelConfig = null;
     config.module.rules.forEach(rule => {
@@ -128,13 +147,18 @@ class TtagPlugin {
               babelConfig = rule;
             }
           });
-        } else if ((rule.use && rule.use.loader && rule.use.loader.includes(BABEL_LOADER_NAME)) || rule.loader.includes(BABEL_LOADER_NAME)) {
+        } else if (
+          (rule.use &&
+            rule.use.loader &&
+            rule.use.loader.includes(BABEL_LOADER_NAME)) ||
+          rule.loader.includes(BABEL_LOADER_NAME)
+        ) {
           babelConfig = rule.use || rule;
         }
       }
     });
     if (!babelConfig) {
-      throw new Error('Babel-loader config not found!!!');
+      throw new Error("Babel-loader config not found!!!");
     } else {
       return babelConfig;
     }
@@ -145,4 +169,4 @@ class TtagPlugin {
   }
 }
 
-module.exports = TtagPlugin;
+export default TtagPlugin;
