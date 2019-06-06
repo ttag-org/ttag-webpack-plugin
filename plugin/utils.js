@@ -1,5 +1,5 @@
 import deepcopy from "deepcopy";
-
+import ttagPlugin from "babel-plugin-ttag";
 const LOCALE_PLACEHOLDER = "[locale]";
 const BABEL_LOADER_NAME = "babel-loader";
 
@@ -7,12 +7,22 @@ export function makeFilename(tpl, locale) {
   return tpl.replace(LOCALE_PLACEHOLDER, locale);
 }
 
+// Hack to mark ttag plugin
+// TODO: fix that inside babel-plugin-ttag
+ttagPlugin._name = "ttag";
+
+function isTtagPlugin(plugin) {
+  return (
+    plugin === "ttag" ||
+    (Array.isArray(plugin) && plugin[0] === "ttag") ||
+    (Array.isArray(plugin) && plugin[0]._name === "ttag")
+  );
+}
+
 export function applyTtagPlugin(options, ttagOpts) {
   const opts = deepcopy(options || {});
-  opts.plugins = (opts.plugins || []).filter(
-    p => p !== "ttag" && (Array.isArray(p) ? p[0] !== "ttag" : true)
-  );
-  opts.plugins.push(["ttag", ttagOpts]);
+  opts.plugins = (opts.plugins || []).filter(p => !isTtagPlugin(p));
+  opts.plugins.push([ttagPlugin, ttagOpts]);
   return opts;
 }
 
@@ -64,7 +74,7 @@ export function setTtagOptions(compiler, ttagOpts) {
       exclude: /(node_modules|bower_components)/,
       use: {
         loader: "babel-loader",
-        plugins: [["ttag", ttagOpts]]
+        plugins: [[ttagPlugin, ttagOpts]]
       }
     });
   }

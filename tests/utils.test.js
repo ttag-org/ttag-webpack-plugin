@@ -38,8 +38,9 @@ describe("setTtagOptions", () => {
     };
 
     setTtagOptions(compiler, { resolve: { translations: "default" } });
+
     expect(JSON.stringify(compiler.options.module)).toContain(
-      '"plugins":[["ttag",{"resolve":{"translations":"default"}'
+      '{"resolve":{"translations":"default"}'
     );
   });
 
@@ -73,7 +74,7 @@ describe("setTtagOptions", () => {
 
     setTtagOptions(compiler, { resolve: { translations: "default" } });
     expect(JSON.stringify(compiler.options.module)).toContain(
-      '"plugins":[["ttag",{"resolve":{"translations":"default"}'
+      '{"resolve":{"translations":"default"}'
     );
   });
 
@@ -93,7 +94,7 @@ describe("setTtagOptions", () => {
 
     setTtagOptions(compiler, { resolve: { translations: "default" } });
     expect(JSON.stringify(compiler.options.module)).toContain(
-      '"plugins":[["ttag",{"resolve":{"translations":"default"}'
+      '{"resolve":{"translations":"default"}'
     );
   });
 
@@ -104,7 +105,7 @@ describe("setTtagOptions", () => {
 
     setTtagOptions(compiler, { resolve: { translations: "default" } });
     expect(JSON.stringify(compiler.options.module)).toContain(
-      '"plugins":[["ttag",{"resolve":{"translations":"default"}'
+      '{"resolve":{"translations":"default"}'
     );
   });
 });
