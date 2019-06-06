@@ -18,6 +18,13 @@ export function applyTtagPlugin(options, ttagOpts) {
 
 export function setTtagOptions(compiler, ttagOpts) {
   const config = compiler.options;
+  let hasBabelPlugin = false;
+  if (!config.module) {
+    config.module = { rules: [] };
+  }
+  if (!config.module.rules) {
+    config.module.rules = [];
+  }
   config.module.rules = config.module.rules.map(rule => {
     // if use is an array
     if (rule.use && Array.isArray(rule.use)) {
@@ -31,9 +38,11 @@ export function setTtagOptions(compiler, ttagOpts) {
             options: {}
           };
           objRuleUse.options = applyTtagPlugin(objRuleUse.options, ttagOpts);
+          hasBabelPlugin = true;
           return objRuleUse;
         } else if (ruleUse.loader.includes(BABEL_LOADER_NAME)) {
           ruleUse.options = applyTtagPlugin(ruleUse.options, ttagOpts);
+          hasBabelPlugin = true;
         }
         return ruleUse;
       });
@@ -45,7 +54,18 @@ export function setTtagOptions(compiler, ttagOpts) {
       rule.use.loader.includes(BABEL_LOADER_NAME)
     ) {
       rule.use.options = applyTtagPlugin(rule.use.options, ttagOpts);
+      hasBabelPlugin = true;
     }
     return rule;
   });
+  if (!hasBabelPlugin) {
+    config.module.rules.push({
+      test: /\.m?jsx?$/,
+      exclude: /(node_modules|bower_components)/,
+      use: {
+        loader: "babel-loader",
+        plugins: [["ttag", ttagOpts]]
+      }
+    });
+  }
 }

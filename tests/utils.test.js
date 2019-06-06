@@ -96,4 +96,15 @@ describe("setTtagOptions", () => {
       '"plugins":[["ttag",{"resolve":{"translations":"default"}'
     );
   });
+
+  test("should apply when there is no babel loader at all", () => {
+    const compiler = {
+      options: {}
+    };
+
+    setTtagOptions(compiler, { resolve: { translations: "default" } });
+    expect(JSON.stringify(compiler.options.module)).toContain(
+      '"plugins":[["ttag",{"resolve":{"translations":"default"}'
+    );
+  });
 });
