@@ -71,24 +71,23 @@ test("should apply translations when entry is a string", async done => {
   done();
 });
 
-// test("should resolve default for the original entry", async done => {
-//   const dir = await tmp.dir({ unsafeCleanup: true });
-//   console.log(dir);
-//   const plugin = new TtagPlugin({
-//     translations: {
-//       uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
-//     }
-//   });
+test("original entry should not have translation", async done => {
+  const dir = await tmp.dir({ unsafeCleanup: true });
+  const plugin = new TtagPlugin({
+    translations: {
+      uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
+    }
+  });
 
-//   const compiler = getCompiler(plugin, {
-//     output: { path: dir.path },
-//     entry: {
-//       entry: path.join(__dirname, "./fixtures/entry/entry.js")
-//     }
-//   });
+  const compiler = getCompiler(plugin, {
+    output: { path: dir.path },
+    entry: {
+      entry: path.join(__dirname, "./fixtures/entry/entry.js")
+    }
+  });
 
-//   await runWebpack(compiler);
-//   const originalFile = await readFile(path.join(dir.path, "entry.js"));
-//   expect(originalFile).toContain('console.log("test translation")');
-//   done();
-// });
+  await runWebpack(compiler);
+  const originalFile = await readFile(path.join(dir.path, "entry.js"));
+  expect(originalFile).not.toContain("test translation [translated]");
+  done();
+});
