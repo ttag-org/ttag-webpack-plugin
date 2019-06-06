@@ -41,7 +41,7 @@ export const runWebpack = async compiler => {
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
       if (err || (stats && stats.hasErrors())) {
-        reject(stats.toJson("errors-only"));
+        reject(stats.toString("normal"));
       }
       resolve(stats);
     });

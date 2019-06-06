@@ -73,18 +73,26 @@ class TtagPlugin {
       }
 
       // TODO: handle if entry is a string
-      Object.keys(compiler.options.entry).forEach(entry => {
-        const entryFiles = compiler.options.entry[entry];
-        if (Array.isArray(entryFiles)) {
-          new MultiEntryPlugin(compiler.context, entryFiles, entry).apply(
-            childCompiler
-          );
-        } else {
-          new SingleEntryPlugin(compiler.context, entryFiles, entry).apply(
-            childCompiler
-          );
-        }
-      });
+      if (typeof compiler.options.entry === "string") {
+        new SingleEntryPlugin(
+          compiler.context,
+          compiler.options.entry,
+          "main"
+        ).apply(childCompiler);
+      } else {
+        Object.keys(compiler.options.entry).forEach(entry => {
+          const entryFiles = compiler.options.entry[entry];
+          if (Array.isArray(entryFiles)) {
+            new MultiEntryPlugin(compiler.context, entryFiles, entry).apply(
+              childCompiler
+            );
+          } else {
+            new SingleEntryPlugin(compiler.context, entryFiles, entry).apply(
+              childCompiler
+            );
+          }
+        });
+      }
 
       // Convert entry chunk to entry file
       new JsonpTemplatePlugin().apply(childCompiler);
