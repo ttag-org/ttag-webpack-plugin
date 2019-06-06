@@ -73,6 +73,7 @@ test("should apply translations when entry is a string", async done => {
 
 // test("should resolve default for the original entry", async done => {
 //   const dir = await tmp.dir({ unsafeCleanup: true });
+//   console.log(dir);
 //   const plugin = new TtagPlugin({
 //     translations: {
 //       uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")

@@ -2,6 +2,7 @@ import deepcopy from "deepcopy";
 import SingleEntryPlugin from "webpack/lib/SingleEntryPlugin";
 import MultiEntryPlugin from "webpack/lib/MultiEntryPlugin";
 import SplitChunksPlugin from "webpack/lib/optimize/SplitChunksPlugin";
+import JsonpTemplatePlugin from "webpack/lib/web/JsonpTemplatePlugin";
 import { makeFilename } from "./utils";
 
 const PLUGIN_NAME = "TtagPlugin";
@@ -10,12 +11,13 @@ const BABEL_LOADER_NAME = "babel-loader";
 class TtagPlugin {
   constructor(options = {}) {
     // Define compilation name and output name
-    this.options = Object.assign(
+    this.options_ = Object.assign(
       {
         translations: {},
         filename: "[name].[locale].js",
         chunkFilename: "[id].[locale].js",
-        excludedPlugins: []
+        excludedPlugins: [PLUGIN_NAME],
+        additionalPlugins: []
       },
       options
     );
@@ -23,22 +25,29 @@ class TtagPlugin {
 
   initChildCompiler(compiler, locale, pofilePath) {
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
-      const childCompilerOpts = deepcopy(compiler.options);
-
-      childCompilerOpts.output.filename = makeFilename(
-        this.options.filename,
+      const outputOptions = deepcopy(compiler.options);
+      this.babelLoaderConfigOptions_ = this.getBabelLoaderOptions(
+        outputOptions
+      );
+      this.newConfigOptions_ = this.makeTtagOptions(
+        this.babelLoaderConfigOptions_,
+        pofilePath
+      );
+      outputOptions.output.filename = makeFilename(
+        this.options_.filename,
         locale
       );
-      childCompilerOpts.output.chunkFilename = makeFilename(
-        this.options.chunkFilename,
+      outputOptions.output.chunkFilename = makeFilename(
+        this.options_.chunkFilename,
         locale
       );
-
+      // Only copy over mini-extract-text-plugin (excluding it breaks extraction entirely)
       let plugins = (compiler.options.plugins || []).filter(
-        c =>
-          this.options.excludedPlugins.indexOf(c.constructor.name) < 0 &&
-          c.constructor.name !== PLUGIN_NAME
+        c => this.options_.excludedPlugins.indexOf(c.constructor.name) < 0
       );
+
+      // Add the additionalPlugins
+      plugins = plugins.concat(this.options_.additionalPlugins);
 
       /**
        * We are deliberatly not passing plugins in createChildCompiler.
@@ -50,14 +59,13 @@ class TtagPlugin {
        */
       const childCompiler = compilation.createChildCompiler(
         PLUGIN_NAME,
-        childCompilerOpts.output
+        outputOptions.output
       );
 
       childCompiler.context = compiler.context;
       childCompiler.inputFileSystem = compiler.inputFileSystem;
       childCompiler.outputFileSystem = compiler.outputFileSystem;
-      childCompiler.options.module = compiler.options.module;
-      childCompiler.options.devtool = compiler.options.devtool;
+      childCompiler.options.module = deepcopy(compiler.options.module);
 
       // Call the `apply` method of all plugins by ourselves.
       if (Array.isArray(plugins)) {
@@ -87,6 +95,9 @@ class TtagPlugin {
         });
       }
 
+      // Convert entry chunk to entry file
+      new JsonpTemplatePlugin().apply(childCompiler);
+
       if (compiler.options.optimization) {
         if (compiler.options.optimization.splitChunks) {
           new SplitChunksPlugin(
@@ -95,16 +106,21 @@ class TtagPlugin {
         }
       }
 
-      // Apply ttag options to existing babel options
-      const ttagOpts = ["ttag", { resolve: { translations: pofilePath } }];
-      const babelOpts = this.getBabelLoaderOptions(childCompilerOpts);
-      babelOpts.plugins = [ttagOpts];
-
       compilation.hooks.additionalAssets.tapAsync(
         PLUGIN_NAME,
         childProcessDone => {
-          const babelLoader = this.getBabelLoader(childCompiler.options);
-          babelLoader.options = babelOpts;
+          let babelLoader;
+          childCompiler.options.module.rules.forEach((rule, index) => {
+            babelLoader = this.getBabelLoader(childCompiler.options);
+            babelLoader.options = this.newConfigOptions_;
+          });
+
+          this.options_.beforeStartExecution &&
+            this.options_.beforeStartExecution(
+              plugins,
+              (babelLoader || {}).options
+            );
+
           childCompiler.runAsChild((err, entries, childCompilation) => {
             if (!err) {
               compilation.assets = Object.assign(
@@ -126,11 +142,29 @@ class TtagPlugin {
   }
 
   apply(compiler) {
-    Object.entries(this.options.translations).forEach(
+    Object.entries(this.options_.translations).forEach(
       ([locale, pofilePath]) => {
         this.initChildCompiler(compiler, locale, pofilePath);
       }
     );
+  }
+
+  makeTtagOptions(options, pofilePath) {
+    options = options || {};
+    options.presets = options.presets || [];
+    const ttagOpts = ["ttag", { resolve: { translations: pofilePath } }];
+    options.plugins = options.plugins || [];
+    options.plugins.push(ttagOpts);
+    return options;
+  }
+
+  addDefaultResolve(options) {
+    options = options || {};
+    options.presets = options.presets || [];
+    const ttagOpts = ["ttag", { resolve: { translations: "default" } }];
+    options.plugins = options.plugins || [];
+    options.plugins.push(ttagOpts);
+    return options;
   }
 
   getBabelLoader(config) {
