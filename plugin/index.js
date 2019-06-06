@@ -3,7 +3,7 @@ import SingleEntryPlugin from "webpack/lib/SingleEntryPlugin";
 import MultiEntryPlugin from "webpack/lib/MultiEntryPlugin";
 import SplitChunksPlugin from "webpack/lib/optimize/SplitChunksPlugin";
 import JsonpTemplatePlugin from "webpack/lib/web/JsonpTemplatePlugin";
-import { makeFilename } from "./utils";
+import { makeFilename, setTtagOptions } from "./utils";
 
 const PLUGIN_NAME = "TtagPlugin";
 const BABEL_LOADER_NAME = "babel-loader";
@@ -16,7 +16,7 @@ class TtagPlugin {
         translations: {},
         filename: "[name].[locale].js",
         chunkFilename: "[id].[locale].js",
-        excludedPlugins: [PLUGIN_NAME]
+        excludedPlugins: []
       },
       options
     );
@@ -25,11 +25,7 @@ class TtagPlugin {
   initChildCompiler(compiler, locale, pofilePath) {
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const outputOptions = deepcopy(compiler.options);
-      const initialBabelOptions = this.getBabelLoaderOptions(outputOptions);
-      const optionsWithTtag = this.makeTtagOptions(
-        initialBabelOptions,
-        pofilePath
-      );
+
       outputOptions.output.filename = makeFilename(
         this.options_.filename,
         locale
@@ -41,7 +37,9 @@ class TtagPlugin {
 
       // Only copy over mini-extract-text-plugin (excluding it breaks extraction entirely)
       let plugins = (compiler.options.plugins || []).filter(
-        c => this.options_.excludedPlugins.indexOf(c.constructor.name) < 0
+        c =>
+          this.options_.excludedPlugins.indexOf(c.constructor.name) < 0 &&
+          c.constructor.name !== PLUGIN_NAME
       );
 
       /**
@@ -61,9 +59,7 @@ class TtagPlugin {
       childCompiler.inputFileSystem = compiler.inputFileSystem;
       childCompiler.outputFileSystem = compiler.outputFileSystem;
       childCompiler.options.module = deepcopy(compiler.options.module);
-
-      const babelLoader = this.getBabelLoader(childCompiler.options);
-      babelLoader.options = optionsWithTtag;
+      this.addResolveOpts(childCompiler, pofilePath);
 
       // Call the `apply` method of all plugins by ourselves.
       if (Array.isArray(plugins)) {
@@ -129,7 +125,7 @@ class TtagPlugin {
 
   apply(compiler) {
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compiler, callback) => {
-      this.addDefaultResolve(this.getBabelLoader(compiler.options).options);
+      this.addDefaultResolve(compiler);
       callback();
     });
     Object.entries(this.options_.translations).forEach(
@@ -139,55 +135,12 @@ class TtagPlugin {
     );
   }
 
-  makeTtagOptions(options, pofilePath) {
-    options = options || {};
-    const ttagOpts = ["ttag", { resolve: { translations: pofilePath } }];
-    options.plugins = (options.plugins || []).filter(
-      p => p !== "ttag" && (Array.isArray(p) ? p[0] !== "ttag" : true)
-    );
-    options.plugins.push(ttagOpts);
-    return options;
+  addResolveOpts(compiler, pofilePath) {
+    setTtagOptions(compiler, { resolve: { translations: pofilePath } });
   }
 
-  addDefaultResolve(options) {
-    options = options || {};
-    const ttagOpts = ["ttag", { resolve: { translations: "default" } }];
-    options.plugins = (options.plugins || []).filter(
-      p => p !== "ttag" && (Array.isArray(p) ? p[0] !== "ttag" : true)
-    );
-    options.plugins.push(ttagOpts);
-    return options;
-  }
-
-  getBabelLoader(config) {
-    let babelConfig = null;
-    config.module.rules.forEach(rule => {
-      if (!babelConfig) {
-        if (rule.use && Array.isArray(rule.use)) {
-          rule.use.forEach(rule => {
-            if (rule.loader.includes(BABEL_LOADER_NAME)) {
-              babelConfig = rule;
-            }
-          });
-        } else if (
-          (rule.use &&
-            rule.use.loader &&
-            rule.use.loader.includes(BABEL_LOADER_NAME)) ||
-          rule.loader.includes(BABEL_LOADER_NAME)
-        ) {
-          babelConfig = rule.use || rule;
-        }
-      }
-    });
-    if (!babelConfig) {
-      throw new Error("Babel-loader config not found!!!");
-    } else {
-      return babelConfig;
-    }
-  }
-
-  getBabelLoaderOptions(config) {
-    return deepcopy(this.getBabelLoader(config).options);
+  addDefaultResolve(compiler) {
+    setTtagOptions(compiler, { resolve: { translations: "default" } });
   }
 }
 

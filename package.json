@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest tests",
+    "test": "jest",
     "update:fixtures:entry": "ttag update tests/fixtures/entry/entry.uk.po tests/fixtures/entry/",
     "webpack": "webpack --mode=development",
     "prettier": "prettier --write 'tests/**/*.js' 'plugin/**/*.js'"
@@ -28,6 +28,9 @@
     "ttag-cli": "^1.7.15",
     "webpack": "^4.33.0",
     "webpack-cli": "^3.3.2"
+  },
+  "jest": {
+    "rootDir": "tests"
   },
   "husky": {
     "hooks": {
