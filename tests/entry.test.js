@@ -89,6 +89,7 @@ test("original entry should not have translation", async done => {
   await runWebpack(compiler);
   const originalFile = await readFile(path.join(dir.path, "entry.js"));
   expect(originalFile).not.toContain("test translation [translated]");
+  dir.cleanup();
   done();
 });
 
@@ -110,5 +111,6 @@ test("original entry should resolve to default", async done => {
   await runWebpack(compiler);
   const originalFile = await readFile(path.join(dir.path, "entry.js"));
   expect(originalFile).toContain("test translation");
+  dir.cleanup();
   done();
 });
