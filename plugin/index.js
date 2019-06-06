@@ -141,7 +141,6 @@ class TtagPlugin {
 
   makeTtagOptions(options, pofilePath) {
     options = options || {};
-    options.presets = options.presets || [];
     const ttagOpts = ["ttag", { resolve: { translations: pofilePath } }];
     options.plugins = (options.plugins || []).filter(
       p => p !== "ttag" && (Array.isArray(p) ? p[0] !== "ttag" : true)
@@ -152,7 +151,6 @@ class TtagPlugin {
 
   addDefaultResolve(options) {
     options = options || {};
-    options.presets = options.presets || [];
     const ttagOpts = ["ttag", { resolve: { translations: "default" } }];
     options.plugins = (options.plugins || []).filter(
       p => p !== "ttag" && (Array.isArray(p) ? p[0] !== "ttag" : true)
