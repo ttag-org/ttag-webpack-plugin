@@ -8,13 +8,13 @@ test("should apply translations when entry is an object", async done => {
 
   const plugin = new TtagPlugin({
     translations: {
-      uk: path.join(__dirname, "./fixtures/entry.uk.po")
+      uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
     }
   });
 
   const compiler = getCompiler(plugin, {
     output: { path: dir.path },
-    entry: { entry: path.join(__dirname, "./fixtures/entry.js") }
+    entry: { entry: path.join(__dirname, "./fixtures/entry/entry.js") }
   });
 
   await runWebpack(compiler);
@@ -29,7 +29,7 @@ test("should apply translations when entry is array", async done => {
 
   const plugin = new TtagPlugin({
     translations: {
-      uk: path.join(__dirname, "./fixtures/entry.uk.po")
+      uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
     }
   });
 
@@ -37,8 +37,8 @@ test("should apply translations when entry is array", async done => {
     output: { path: dir.path },
     entry: {
       entry: [
-        path.join(__dirname, "./fixtures/entry.js"),
-        path.join(__dirname, "./fixtures/entry2.js")
+        path.join(__dirname, "./fixtures/entry/entry.js"),
+        path.join(__dirname, "./fixtures/entry/entry2.js")
       ]
     }
   });
@@ -55,13 +55,13 @@ test("should apply translations when entry is a string", async done => {
   const dir = await tmp.dir({ unsafeCleanup: true });
   const plugin = new TtagPlugin({
     translations: {
-      uk: path.join(__dirname, "./fixtures/entry.uk.po")
+      uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
     }
   });
 
   const compiler = getCompiler(plugin, {
     output: { path: dir.path },
-    entry: path.join(__dirname, "./fixtures/entry.js")
+    entry: path.join(__dirname, "./fixtures/entry/entry.js")
   });
 
   await runWebpack(compiler);
@@ -70,3 +70,24 @@ test("should apply translations when entry is a string", async done => {
   dir.cleanup();
   done();
 });
+
+// test("should resolve default for the original entry", async done => {
+//   const dir = await tmp.dir({ unsafeCleanup: true });
+//   const plugin = new TtagPlugin({
+//     translations: {
+//       uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
+//     }
+//   });
+
+//   const compiler = getCompiler(plugin, {
+//     output: { path: dir.path },
+//     entry: {
+//       entry: path.join(__dirname, "./fixtures/entry/entry.js")
+//     }
+//   });
+
+//   await runWebpack(compiler);
+//   const originalFile = await readFile(path.join(dir.path, "entry.js"));
+//   expect(originalFile).toContain('console.log("test translation")');
+//   done();
+// });

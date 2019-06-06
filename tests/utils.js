@@ -1,8 +1,10 @@
 import webpack from "webpack";
 import fs from "fs";
+import { NONAME } from "dns";
 
 const defaultConfig = {
   mode: "development",
+  devtool: "none",
   module: {
     rules: [
       {

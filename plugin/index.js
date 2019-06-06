@@ -1,10 +1,8 @@
+import deepcopy from "deepcopy";
 import SingleEntryPlugin from "webpack/lib/SingleEntryPlugin";
 import MultiEntryPlugin from "webpack/lib/MultiEntryPlugin";
 import SplitChunksPlugin from "webpack/lib/optimize/SplitChunksPlugin";
-import JsonpTemplatePlugin from "webpack/lib/web/JsonpTemplatePlugin";
 import { makeFilename } from "./utils";
-
-const deepcopy = require("deepcopy");
 
 const PLUGIN_NAME = "TtagPlugin";
 const BABEL_LOADER_NAME = "babel-loader";
@@ -17,34 +15,29 @@ class TtagPlugin {
         translations: {},
         filename: "[name].[locale].js",
         chunkFilename: "[id].[locale].js",
-        excludedPlugins: [PLUGIN_NAME]
+        excludedPlugins: []
       },
       options
     );
   }
 
   initChildCompiler(compiler, locale, pofilePath) {
-    const ttagOpts = ["ttag", { resolve: { translations: pofilePath } }];
-
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
-      const outputOptions = deepcopy(compiler.options);
-      this.babelLoaderConfigOptions_ = this.getBabelLoaderOptions(
-        outputOptions
-      );
-      this.babelLoaderConfigOptions_.plugins = [ttagOpts];
-      this.newConfigOptions_ = this.babelLoaderConfigOptions_;
+      const childCompilerOpts = deepcopy(compiler.options);
 
-      outputOptions.output.filename = makeFilename(
+      childCompilerOpts.output.filename = makeFilename(
         this.options.filename,
         locale
       );
-      outputOptions.output.chunkFilename = makeFilename(
+      childCompilerOpts.output.chunkFilename = makeFilename(
         this.options.chunkFilename,
         locale
       );
 
       let plugins = (compiler.options.plugins || []).filter(
-        c => this.options.excludedPlugins.indexOf(c.constructor.name) < 0
+        c =>
+          this.options.excludedPlugins.indexOf(c.constructor.name) < 0 &&
+          c.constructor.name !== PLUGIN_NAME
       );
 
       /**
@@ -57,13 +50,14 @@ class TtagPlugin {
        */
       const childCompiler = compilation.createChildCompiler(
         PLUGIN_NAME,
-        outputOptions.output
+        childCompilerOpts.output
       );
 
       childCompiler.context = compiler.context;
       childCompiler.inputFileSystem = compiler.inputFileSystem;
       childCompiler.outputFileSystem = compiler.outputFileSystem;
       childCompiler.options.module = compiler.options.module;
+      childCompiler.options.devtool = compiler.options.devtool;
 
       // Call the `apply` method of all plugins by ourselves.
       if (Array.isArray(plugins)) {
@@ -72,7 +66,6 @@ class TtagPlugin {
         }
       }
 
-      // TODO: handle if entry is a string
       if (typeof compiler.options.entry === "string") {
         new SingleEntryPlugin(
           compiler.context,
@@ -94,9 +87,6 @@ class TtagPlugin {
         });
       }
 
-      // Convert entry chunk to entry file
-      new JsonpTemplatePlugin().apply(childCompiler);
-
       if (compiler.options.optimization) {
         if (compiler.options.optimization.splitChunks) {
           new SplitChunksPlugin(
@@ -105,14 +95,16 @@ class TtagPlugin {
         }
       }
 
+      // Apply ttag options to existing babel options
+      const ttagOpts = ["ttag", { resolve: { translations: pofilePath } }];
+      const babelOpts = this.getBabelLoaderOptions(childCompilerOpts);
+      babelOpts.plugins = [ttagOpts];
+
       compilation.hooks.additionalAssets.tapAsync(
         PLUGIN_NAME,
         childProcessDone => {
-          let babelLoader;
-          childCompiler.options.module.rules.forEach((rule, index) => {
-            babelLoader = this.getBabelLoader(childCompiler.options);
-            babelLoader.options = this.newConfigOptions_;
-          });
+          const babelLoader = this.getBabelLoader(childCompiler.options);
+          babelLoader.options = babelOpts;
           childCompiler.runAsChild((err, entries, childCompilation) => {
             if (!err) {
               compilation.assets = Object.assign(

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest tests",
-    "update:fixtures": "ttag update tests/fixtures/entry.uk.po tests/fixtures/*.js",
+    "update:fixtures:entry": "ttag update tests/fixtures/entry/entry.uk.po tests/fixtures/entry/",
     "webpack": "webpack --mode=development",
     "prettier": "prettier --write 'tests/**/*.js' 'plugin/**/*.js'"
   },
