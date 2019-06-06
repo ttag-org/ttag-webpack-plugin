@@ -11,7 +11,7 @@ const BABEL_LOADER_NAME = "babel-loader";
 class TtagPlugin {
   constructor(options = {}) {
     // Define compilation name and output name
-    this.options_ = Object.assign(
+    this.options = Object.assign(
       {
         translations: {},
         filename: "[name].[locale].js",
@@ -27,18 +27,18 @@ class TtagPlugin {
       const outputOptions = deepcopy(compiler.options);
 
       outputOptions.output.filename = makeFilename(
-        this.options_.filename,
+        this.options.filename,
         locale
       );
       outputOptions.output.chunkFilename = makeFilename(
-        this.options_.chunkFilename,
+        this.options.chunkFilename,
         locale
       );
 
       // Only copy over mini-extract-text-plugin (excluding it breaks extraction entirely)
       let plugins = (compiler.options.plugins || []).filter(
         c =>
-          this.options_.excludedPlugins.indexOf(c.constructor.name) < 0 &&
+          this.options.excludedPlugins.indexOf(c.constructor.name) < 0 &&
           c.constructor.name !== PLUGIN_NAME
       );
 
@@ -128,7 +128,7 @@ class TtagPlugin {
       this.addDefaultResolve(compiler);
       callback();
     });
-    Object.entries(this.options_.translations).forEach(
+    Object.entries(this.options.translations).forEach(
       ([locale, pofilePath]) => {
         this.initChildCompiler(compiler, locale, pofilePath);
       }

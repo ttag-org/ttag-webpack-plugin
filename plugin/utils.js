@@ -48,5 +48,4 @@ export function setTtagOptions(compiler, ttagOpts) {
     }
     return rule;
   });
-  return compiler;
 }
