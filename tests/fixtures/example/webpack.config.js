@@ -16,16 +16,6 @@ module.exports = {
         use: {
           loader: "babel-loader",
           options: {
-            presets: [
-              [
-                "@babel/preset-env",
-                {
-                  targets: {
-                    node: "current"
-                  }
-                }
-              ]
-            ],
             plugins: ["@babel/plugin-syntax-dynamic-import"]
           }
         }
@@ -38,8 +28,5 @@ module.exports = {
         uk: path.join(__dirname, "./i18n/uk.po")
       }
     })
-  ],
-  optimization: {
-    minimize: false
-  }
+  ]
 };
