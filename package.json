@@ -7,7 +7,8 @@
     "test": "jest",
     "update:fixtures:entry": "ttag update tests/fixtures/entry/entry.uk.po tests/fixtures/entry/",
     "webpack": "webpack --mode=development",
-    "prettier": "prettier --write 'tests/**/*.js' 'plugin/**/*.js'"
+    "prettier": "prettier --write 'tests/**/*.js' 'plugin/**/*.js'",
+    "build": "rm -rf dist && babel plugin --out-dir dist"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "babel-loader": "^8.0.6"
   },
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "babel-loader": "^8.0.6",

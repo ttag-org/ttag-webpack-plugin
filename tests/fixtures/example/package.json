@@ -1,0 +1,25 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "update": "ttag update i18n/uk.po src",
+    "start": "npm run build && ws"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "local-web-server": "^2.6.1",
+    "ttag-cli": "^1.7.15",
+    "webpack": "^4.33.0"
+  },
+  "dependencies": {
+    "ttag": "^1.7.15"
+  }
+}
