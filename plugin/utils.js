@@ -1,5 +1,4 @@
 import deepcopy from "deepcopy";
-import ttagPlugin from "babel-plugin-ttag";
 const LOCALE_PLACEHOLDER = "[locale]";
 const BABEL_LOADER_NAME = "babel-loader";
 
@@ -7,22 +6,19 @@ export function makeFilename(tpl, locale) {
   return tpl.replace(LOCALE_PLACEHOLDER, locale);
 }
 
-// Hack to mark ttag plugin
-// TODO: fix that inside babel-plugin-ttag
-ttagPlugin._name = "ttag";
-
 function isTtagPlugin(plugin) {
   return (
     plugin === "ttag" ||
     (Array.isArray(plugin) && plugin[0] === "ttag") ||
-    (Array.isArray(plugin) && plugin[0]._name === "ttag")
+    plugin === "babel-plugin-ttag" ||
+    (Array.isArray(plugin) && plugin[0] === "babel-plugin-ttag")
   );
 }
 
 export function applyTtagPlugin(options, ttagOpts) {
   const opts = deepcopy(options || {});
   opts.plugins = (opts.plugins || []).filter(p => !isTtagPlugin(p));
-  opts.plugins.push([ttagPlugin, ttagOpts]);
+  opts.plugins.push(["babel-plugin-ttag", ttagOpts]);
   return opts;
 }
 
@@ -38,23 +34,22 @@ export function setTtagOptions(compiler, ttagOpts) {
   config.module.rules = config.module.rules.map(rule => {
     // if use is an array
     if (rule.use && Array.isArray(rule.use)) {
-      rule.use = rule.use.map(ruleUse => {
-        if (
-          typeof ruleUse === "string" &&
-          ruleUse.includes(BABEL_LOADER_NAME)
-        ) {
-          const objRuleUse = {
-            loader: ruleUse,
-            options: {}
-          };
-          objRuleUse.options = applyTtagPlugin(objRuleUse.options, ttagOpts);
-          hasBabelPlugin = true;
-          return objRuleUse;
-        } else if (ruleUse.loader.includes(BABEL_LOADER_NAME)) {
-          ruleUse.options = applyTtagPlugin(ruleUse.options, ttagOpts);
+      rule.use = rule.use.map(loader => {
+        if (typeof loader === "string") {
+          if (loader.includes(BABEL_LOADER_NAME)) {
+            const objRuleUse = {
+              loader: loader,
+              options: {}
+            };
+            objRuleUse.options = applyTtagPlugin(objRuleUse.options, ttagOpts);
+            hasBabelPlugin = true;
+            return objRuleUse;
+          }
+        } else if (loader.loader && loader.loader.includes(BABEL_LOADER_NAME)) {
+          loader.options = applyTtagPlugin(loader.options, ttagOpts);
           hasBabelPlugin = true;
         }
-        return ruleUse;
+        return loader;
       });
     }
     // if use is an object
@@ -74,7 +69,7 @@ export function setTtagOptions(compiler, ttagOpts) {
       exclude: /(node_modules|bower_components)/,
       use: {
         loader: "babel-loader",
-        plugins: [[ttagPlugin, ttagOpts]]
+        plugins: [["babel-plugin-ttag", ttagOpts]]
       }
     });
   }

@@ -35,7 +35,11 @@
     "webpack-cli": "^3.3.2"
   },
   "jest": {
-    "rootDir": "tests"
+    "rootDir": "tests",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/fixtures/"
+    ]
   },
   "husky": {
     "hooks": {

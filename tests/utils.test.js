@@ -43,6 +43,40 @@ describe("setTtagOptions", () => {
       '{"resolve":{"translations":"default"}'
     );
   });
+  const eslintLoader = {
+    loader: "eslint-loader",
+    options: { exclude: /node_modules/ }
+  };
+
+  const babelLoader = {
+    loader: "babel-loader",
+    options: {
+      plugins: []
+    }
+  };
+
+  const babelLoaders = ["thread-loader", babelLoader, eslintLoader];
+
+  const nestedUseCase = {
+    test: /\.(js|jsx)$/,
+    exclude: /node_modules/,
+    use: babelLoaders
+  };
+
+  test("should apply when nested use", () => {
+    const compiler = {
+      options: {
+        module: {
+          rules: [nestedUseCase]
+        }
+      }
+    };
+
+    setTtagOptions(compiler, { resolve: { translations: "default" } });
+    expect(JSON.stringify(compiler.options.module)).toContain(
+      '{"resolve":{"translations":"default"}'
+    );
+  });
 
   const babelUseAsObject = {
     test: /\.js$/,
