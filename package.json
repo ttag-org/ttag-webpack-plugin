@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest tests-unit",
+    "test:integration": "npm run build && sh tests-integration/before.sh && NODE_ENV=test:integration jest tests-integration",
     "update:fixtures:entry": "ttag update tests/fixtures/entry/entry.uk.po tests/fixtures/entry/",
     "webpack": "webpack --mode=development",
     "prettier": "prettier --write 'tests/**/*.js' 'plugin/**/*.js'",
@@ -26,20 +28,15 @@
     "babel-loader": "^8.0.6",
     "husky": "^2.4.0",
     "jest": "^24.8.0",
+    "local-web-server": "^2.6.1",
     "prettier": "^1.17.1",
     "pretty-quick": "^1.11.0",
+    "puppeteer": "^1.17.0",
     "tmp-promise": "^2.0.1",
     "ttag": "^1.7.15",
     "ttag-cli": "^1.7.15",
     "webpack": "^4.33.0",
     "webpack-cli": "^3.3.2"
-  },
-  "jest": {
-    "rootDir": "tests",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/fixtures/"
-    ]
   },
   "husky": {
     "hooks": {
