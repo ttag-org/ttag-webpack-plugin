@@ -6,7 +6,6 @@ import JsonpTemplatePlugin from "webpack/lib/web/JsonpTemplatePlugin";
 import { makeFilename, setTtagOptions } from "./utils";
 
 const PLUGIN_NAME = "TtagPlugin";
-const BABEL_LOADER_NAME = "babel-loader";
 
 class TtagPlugin {
   constructor(options = {}) {
@@ -144,4 +143,6 @@ class TtagPlugin {
   }
 }
 
-export default TtagPlugin;
+// little hack to make work:
+// const TtagPlugin = require('..')
+module.exports = TtagPlugin;

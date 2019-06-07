@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": ">=6.x"
+  },
   "scripts": {
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "jest tests-unit",
@@ -15,17 +18,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-plugin-ttag": "^1.7.15",
     "deepcopy": "^2.0.0"
   },
   "peerDependencies": {
-    "babel-loader": "^8.0.6"
+    "babel-loader": ">=8.x",
+    "webpack": ">=4.20.x",
+    "babel-plugin-ttag": ">=1.7.x"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "babel-loader": "^8.0.6",
+    "babel-plugin-ttag": "^1.7.15",
     "husky": "^2.4.0",
     "jest": "^24.8.0",
     "local-web-server": "^2.6.1",

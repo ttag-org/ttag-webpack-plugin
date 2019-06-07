@@ -1,5 +1,5 @@
 const path = require("path");
-const TtagPlugin = require("../../../dist/index").default;
+const TtagPlugin = require("../../../dist/index");
 module.exports = {
   mode: "development",
   entry: {
