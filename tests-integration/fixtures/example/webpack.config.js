@@ -22,6 +22,18 @@ module.exports = {
       }
     ]
   },
+  optimization: {
+    runtimeChunk: true,
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          test: /node_modules|vendor/,
+          name: "vendors",
+          chunks: "all"
+        }
+      }
+    }
+  },
   plugins: [
     new TtagPlugin({
       translations: {

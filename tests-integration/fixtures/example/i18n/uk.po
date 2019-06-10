@@ -7,7 +7,7 @@ msgstr ""
 "mime-version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/index.js:3
+#: src/index.js:7
 msgid "test"
 msgstr "тест"
 
@@ -18,3 +18,11 @@ msgstr "модуль 1 готовий"
 #: src/module2.js:4
 msgid "module 2 ready"
 msgstr "модуль 2 готовий"
+
+#: src/vendor1.js:4
+msgid "vendor1"
+msgstr "вендор1"
+
+#: src/vendor2.js:4
+msgid "vendor2"
+msgstr "вендор2"
