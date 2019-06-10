@@ -88,7 +88,7 @@ class TtagPlugin {
         });
       }
 
-      // Convert entry chunk to entry file
+      // The next line makes async chunks work (do not remove that)
       new JsonpTemplatePlugin().apply(childCompiler);
 
       if (compiler.options.optimization) {
