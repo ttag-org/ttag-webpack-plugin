@@ -2,7 +2,7 @@ import deepcopy from "deepcopy";
 const LOCALE_PLACEHOLDER = "[locale]";
 const BABEL_LOADER_NAME = "babel-loader";
 
-export function makeFilename(tpl, locale) {
+export function makeFilenameTpl(tpl, locale) {
   return tpl.replace(LOCALE_PLACEHOLDER, locale);
 }
 
@@ -73,4 +73,32 @@ export function setTtagOptions(compiler, ttagOpts) {
       }
     });
   }
+}
+
+export function getFilename(locale, outputOptions, options) {
+  if (options.filename) return options.filename;
+  if (outputOptions && outputOptions.filename) {
+    if (outputOptions.filename.includes("[name]")) {
+      return outputOptions.filename;
+    } else {
+      return outputOptions.filename.replace(/\.(\w+)$/, `-${locale}.$1`);
+    }
+  }
+  return `[name]-${locale}.js`;
+}
+
+export function getChunkFilename(locale, outputOptions, options) {
+  if (options.chunkFilename) return options.chunkFilename;
+  if (outputOptions && outputOptions.chunkFilename) {
+    if (outputOptions.chunkFilename.includes("[name]")) {
+      return outputOptions.chunkFilename.replace("[name]", `[name]-${locale}`);
+    } else {
+      return outputOptions.chunkFilename.replace(/\.(\w+)$/, `-${locale}.$1`);
+    }
+  }
+  return `[id].[name]-${locale}.js`;
+}
+
+export function makeEntrypoint(locale, entrypointName) {
+  return `${entrypointName}-${locale}`;
 }

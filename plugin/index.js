@@ -3,7 +3,12 @@ import SingleEntryPlugin from "webpack/lib/SingleEntryPlugin";
 import MultiEntryPlugin from "webpack/lib/MultiEntryPlugin";
 import SplitChunksPlugin from "webpack/lib/optimize/SplitChunksPlugin";
 import JsonpTemplatePlugin from "webpack/lib/web/JsonpTemplatePlugin";
-import { makeFilename, setTtagOptions } from "./utils";
+import {
+  makeEntrypoint,
+  setTtagOptions,
+  getFilename,
+  getChunkFilename
+} from "./utils";
 
 const PLUGIN_NAME = "TtagPlugin";
 
@@ -13,8 +18,8 @@ class TtagPlugin {
     this.options = Object.assign(
       {
         translations: {},
-        filename: "[name].[locale].js",
-        chunkFilename: "[id].[locale].js",
+        filename: undefined,
+        chunkFilename: undefined,
         excludedPlugins: []
       },
       options
@@ -25,13 +30,16 @@ class TtagPlugin {
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const outputOptions = deepcopy(compiler.options);
 
-      outputOptions.output.filename = makeFilename(
-        this.options.filename,
-        locale
+      outputOptions.output.filename = getFilename(
+        locale,
+        compiler.options.output,
+        this.options
       );
-      outputOptions.output.chunkFilename = makeFilename(
-        this.options.chunkFilename,
-        locale
+
+      outputOptions.output.chunkFilename = getChunkFilename(
+        locale,
+        compiler.options.output,
+        this.options
       );
 
       // Only copy over mini-extract-text-plugin (excluding it breaks extraction entirely)
@@ -71,19 +79,23 @@ class TtagPlugin {
         new SingleEntryPlugin(
           compiler.context,
           compiler.options.entry,
-          "main"
+          makeEntrypoint(locale, "main")
         ).apply(childCompiler);
       } else {
         Object.keys(compiler.options.entry).forEach(entry => {
           const entryFiles = compiler.options.entry[entry];
           if (Array.isArray(entryFiles)) {
-            new MultiEntryPlugin(compiler.context, entryFiles, entry).apply(
-              childCompiler
-            );
+            new MultiEntryPlugin(
+              compiler.context,
+              entryFiles,
+              makeEntrypoint(locale, entry)
+            ).apply(childCompiler);
           } else {
-            new SingleEntryPlugin(compiler.context, entryFiles, entry).apply(
-              childCompiler
-            );
+            new SingleEntryPlugin(
+              compiler.context,
+              entryFiles,
+              makeEntrypoint(locale, entry)
+            ).apply(childCompiler);
           }
         });
       }

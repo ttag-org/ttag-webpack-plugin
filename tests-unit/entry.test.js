@@ -18,7 +18,7 @@ test("should apply translations when entry is an object", async done => {
   });
 
   await runWebpack(compiler);
-  const transFile = await readFile(path.join(dir.path, "entry.uk.js"));
+  const transFile = await readFile(path.join(dir.path, "entry-uk.js"));
   expect(transFile).toContain("test translation [translated]");
   dir.cleanup();
   done();
@@ -44,7 +44,7 @@ test("should apply translations when entry is array", async done => {
   });
 
   await runWebpack(compiler);
-  const transFile = await readFile(path.join(dir.path, "entry.uk.js"));
+  const transFile = await readFile(path.join(dir.path, "entry-uk.js"));
   expect(transFile).toContain("test translation [translated]");
   expect(transFile).toContain("test translation entry 2 [translated]");
   dir.cleanup();
@@ -65,7 +65,7 @@ test("should apply translations when entry is a string", async done => {
   });
 
   await runWebpack(compiler);
-  const transFile = await readFile(path.join(dir.path, "main.uk.js"));
+  const transFile = await readFile(path.join(dir.path, "main-uk.js"));
   expect(transFile).toContain("test translation [translated]");
   dir.cleanup();
   done();
