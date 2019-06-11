@@ -115,6 +115,18 @@ class TtagPlugin {
         PLUGIN_NAME,
         childProcessDone => {
           childCompiler.runAsChild((err, entries, childCompilation) => {
+            // name split-chunks with locale
+            compilation.chunks = compilation.chunks.concat(
+              childCompilation.chunks.map(ch => {
+                if (
+                  ch.chunkReason &&
+                  ch.chunkReason.startsWith("split chunk")
+                ) {
+                  ch.name = makeEntrypoint(locale, ch.name);
+                }
+                return ch;
+              })
+            );
             if (!err) {
               compilation.assets = Object.assign(
                 childCompilation.assets,
