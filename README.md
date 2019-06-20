@@ -11,9 +11,14 @@ Add this plugin to generate localized build for each locale. This plugin will ap
 npm i -D ttag-webpack-plugin babel-plugin-ttag
 ```
 
-### Note
-This plugin only works when you're already using `babel-loader`.
-
+### Basic usage
+```js
+new TtagPlugin({
+   translations: {
+      uk: path.join(__dirname, "./i18n/uk.po")
+   }
+});
+```
 
 ## Options
 ```js
@@ -33,13 +38,13 @@ new TtagPlugin({
 
 ## Without this plugin
 A usual output from webpack output looks like this:
-![ES5 output]()
+![simple output](etc/without-plugin.png)
 
 ## With this plugin
 With this plugin added, you will be generating localized outputs:
-![ES5 output]()
+![ES5 output](etc/with-plugin.png)
 
-## How to use
+## Example:
 ```js
 const path = require("path");
 const TtagPlugin = require("ttag-webpack-plugin");
