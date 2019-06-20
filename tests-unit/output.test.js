@@ -24,3 +24,50 @@ test("should modify existing filename", async done => {
   expect(transFile).toContain("test translation [translated]");
   done();
 });
+
+test("should add vendor chunks from child compilation", async done => {
+  const dir = await tmp.dir({ unsafeCleanup: true });
+  const plugin = new TtagPlugin({
+    translations: {
+      uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
+    }
+  });
+
+  const compiler = getCompiler(plugin, {
+    output: {
+      path: dir.path,
+      filename: "js/[name].js"
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          use: {
+            loader: "babel-loader",
+            options: {
+              plugins: ["@babel/plugin-syntax-dynamic-import"]
+            }
+          }
+        }
+      ]
+    },
+    entry: { entry: path.join(__dirname, "./fixtures/entry/entry-async.js") },
+    optimization: {
+      runtimeChunk: true,
+      splitChunks: {
+        cacheGroups: {
+          commons: {
+            test: /node_modules/,
+            name: "vendors",
+            chunks: "all"
+          }
+        }
+      }
+    }
+  });
+
+  const stats = await runWebpack(compiler);
+  const chunkNames = stats.compilation.chunks.map(ch => ch.name);
+  expect(chunkNames).toContain("vendors-uk");
+  done();
+});
