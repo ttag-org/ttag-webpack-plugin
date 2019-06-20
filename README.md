@@ -17,7 +17,7 @@ This plugin only works when you're already using `babel-loader`.
 
 ## Options
 ```js
-new BabelEsmPlugin({
+new TtagPlugin({
   translations: {
    <locale>: <path to the .po file>
   },
