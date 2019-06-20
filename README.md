@@ -1,10 +1,8 @@
-# status: beta
-> The project is in early beta, feel free to report any issues or bugs
+
+# ttag-webpack-plugin (status: beta)
+Add this plugin to generate localized build for each locale. This plugin will apply `babel-ttag-plugin` with appropriate settings for each locale
 
 ### Works with Webpack4 and Babel7
-
-# ttag-webpack-plugin
-Add this plugin to generate localized build for each locale. This plugin will apply `babel-ttag-plugin` with appropriate settings for each locale
 
 ```
 npm i -D ttag-webpack-plugin babel-plugin-ttag
