@@ -38,11 +38,13 @@ new TtagPlugin({
 
 ## Without this plugin
 A usual output from webpack output looks like this:
-![simple output](etc/without-plugin.png)
+
+![Simple output](etc/without-plugin.png)
 
 ## With this plugin
 With this plugin added, you will be generating localized outputs:
-![ES5 output](etc/with-plugin.png)
+
+![Localized output](etc/with-plugin.png)
 
 ## Example:
 ```js
