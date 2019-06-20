@@ -41,7 +41,9 @@ With this plugin added, you will be generating localized outputs:
 
 ## How to use
 ```js
+const path = require("path");
 const TtagPlugin = require("ttag-webpack-plugin");
+
 module.exports = {
   entry: {
     main: "./src/index.js"
