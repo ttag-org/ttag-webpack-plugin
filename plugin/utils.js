@@ -17,8 +17,16 @@ function isTtagPlugin(plugin) {
 
 export function applyTtagPlugin(options, ttagOpts) {
   const opts = deepcopy(options || {});
-  opts.plugins = (opts.plugins || []).filter(p => !isTtagPlugin(p));
-  opts.plugins.push(["babel-plugin-ttag", ttagOpts]);
+  if (!opts.plugins) {
+    opts.plugins = [];
+  }
+  const ttagPlugin = opts.plugins.find(p => isTtagPlugin(p));
+  if (ttagPlugin) {
+    // TODO: add test case when modify ttag options
+    ttagPlugin[1].resolve = ttagOpts.resolve;
+  } else {
+    opts.plugins.push(["babel-plugin-ttag", ttagOpts]);
+  }
   return opts;
 }
 
