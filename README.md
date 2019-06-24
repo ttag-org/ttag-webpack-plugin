@@ -2,6 +2,9 @@
 # ttag-webpack-plugin 
 > status: beta
 
+* `ttag` library - https://ttag.js.org/
+* `ttag` and `ttag-webpack-plugin` integration - https://ttag.js.org/docs/webpack.html
+
 Add this plugin to generate localized build for each locale. This plugin will apply `babel-ttag-plugin` with appropriate settings for each locale
 
 > Works with Webpack4 and Babel7
