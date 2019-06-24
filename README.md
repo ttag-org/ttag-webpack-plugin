@@ -1,6 +1,5 @@
 
 # ttag-webpack-plugin 
-> status: beta
 
 * `ttag` library - https://ttag.js.org/
 * `ttag` and `ttag-webpack-plugin` integration - https://ttag.js.org/docs/webpack.html
