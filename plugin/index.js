@@ -17,6 +17,7 @@ class TtagPlugin {
     // Define compilation name and output name
     this.options = Object.assign(
       {
+        ttag: {},
         translations: {},
         filename: undefined,
         chunkFilename: undefined,
@@ -159,11 +160,19 @@ class TtagPlugin {
   }
 
   addResolveOpts(compiler, pofilePath) {
-    setTtagOptions(compiler, { resolve: { translations: pofilePath } });
+    const ttagOpts = {
+      ...this.options.ttag,
+      ...{ resolve: { translations: pofilePath } }
+    };
+    setTtagOptions(compiler, ttagOpts);
   }
 
   addDefaultResolve(compiler) {
-    setTtagOptions(compiler, { resolve: { translations: "default" } });
+    const ttagOpts = {
+      ...this.options.ttag,
+      ...{ resolve: { translations: "default" } }
+    };
+    setTtagOptions(compiler, ttagOpts);
   }
 }
 
