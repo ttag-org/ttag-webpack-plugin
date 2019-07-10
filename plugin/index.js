@@ -161,14 +161,16 @@ class TtagPlugin {
 
   addResolveOpts(compiler, pofilePath) {
     const ttagOpts = {
-      ...{ resolve: { translations: pofilePath }, ...this.options.ttag }
+      ...this.options.ttag,
+      ...{ resolve: { translations: pofilePath } }
     };
     setTtagOptions(compiler, ttagOpts);
   }
 
   addDefaultResolve(compiler) {
     const ttagOpts = {
-      ...{ resolve: { translations: "default" }, ...this.options.ttag }
+      ...this.options.ttag,
+      ...{ resolve: { translations: "default" } }
     };
     setTtagOptions(compiler, ttagOpts);
   }
