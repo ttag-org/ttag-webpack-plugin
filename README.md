@@ -1,4 +1,6 @@
-# ttag-webpack-plugin
+# ttag-webpack-plugin (experimental)
+
+> This plugin is an experimental feature, if something goes wrong, still you can use `babel-plugin-ttag` to setup your localization workflow. Follow the doc - https://ttag.js.org/blog/2018/09/05/hardcore-webpack-setup.html
 
 - `ttag` library - https://ttag.js.org/
 - `ttag` and `ttag-webpack-plugin` integration - https://ttag.js.org/docs/webpack.html
