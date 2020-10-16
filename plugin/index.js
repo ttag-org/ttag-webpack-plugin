@@ -1,6 +1,4 @@
 import deepcopy from "deepcopy";
-import SingleEntryPlugin from "webpack/lib/SingleEntryPlugin";
-import MultiEntryPlugin from "webpack/lib/MultiEntryPlugin";
 import SplitChunksPlugin from "webpack/lib/optimize/SplitChunksPlugin";
 import JsonpTemplatePlugin from "webpack/lib/web/JsonpTemplatePlugin";
 import {
@@ -9,6 +7,19 @@ import {
   getFilename,
   getChunkFilename
 } from "./utils";
+
+let EntryPlugin;
+let SingleEntryPlugin;
+let MultiEntryPlugin;
+
+try {
+  // webpack 5
+  EntryPlugin = require("webpack/lib/EntryPlugin");
+} catch (e) {
+  // webpack 4
+  SingleEntryPlugin = require("webpack/lib/SingleEntryPlugin");
+  MultiEntryPlugin = require("webpack/lib/MultiEntryPlugin");
+}
 
 const PLUGIN_NAME = "TtagPlugin";
 
@@ -76,30 +87,7 @@ class TtagPlugin {
         }
       }
 
-      if (typeof compiler.options.entry === "string") {
-        new SingleEntryPlugin(
-          compiler.context,
-          compiler.options.entry,
-          makeEntrypoint(locale, "main")
-        ).apply(childCompiler);
-      } else {
-        Object.keys(compiler.options.entry).forEach(entry => {
-          const entryFiles = compiler.options.entry[entry];
-          if (Array.isArray(entryFiles)) {
-            new MultiEntryPlugin(
-              compiler.context,
-              entryFiles,
-              makeEntrypoint(locale, entry)
-            ).apply(childCompiler);
-          } else {
-            new SingleEntryPlugin(
-              compiler.context,
-              entryFiles,
-              makeEntrypoint(locale, entry)
-            ).apply(childCompiler);
-          }
-        });
-      }
+      this.applyEntryPlugin(compiler, childCompiler, locale);
 
       // The next line makes async chunks work (do not remove that)
       new JsonpTemplatePlugin().apply(childCompiler);
@@ -157,6 +145,48 @@ class TtagPlugin {
         this.initChildCompiler(compiler, locale, pofilePath);
       }
     );
+  }
+
+  applyEntryPlugin(compiler, childCompiler, locale) {
+    if (EntryPlugin) {
+      // webpack 5
+      Object.keys(compiler.options.entry).forEach(entry => {
+        const entryFiles = compiler.options.entry[entry].import;
+
+        entryFiles.forEach(ent => {
+          new EntryPlugin(compiler.context, ent, {
+            name: makeEntrypoint(locale, entry)
+          }).apply(childCompiler);
+        });
+      });
+    } else {
+      // webpack 4
+      if (typeof compiler.options.entry === "string") {
+        new SingleEntryPlugin(
+          compiler.context,
+          compiler.options.entry,
+          makeEntrypoint(locale, "main")
+        ).apply(childCompiler);
+      } else {
+        Object.keys(compiler.options.entry).forEach(entry => {
+          const entryFiles = compiler.options.entry[entry];
+
+          if (Array.isArray(entryFiles)) {
+            new MultiEntryPlugin(
+              compiler.context,
+              entryFiles,
+              makeEntrypoint(locale, entry)
+            ).apply(childCompiler);
+          } else {
+            new SingleEntryPlugin(
+              compiler.context,
+              entryFiles,
+              makeEntrypoint(locale, entry)
+            ).apply(childCompiler);
+          }
+        });
+      }
+    }
   }
 
   addResolveOpts(compiler, pofilePath) {
