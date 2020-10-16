@@ -8,7 +8,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, "./dist")
   },
-  devtool: "none",
   module: {
     rules: [
       {
@@ -27,7 +26,7 @@ module.exports = {
     splitChunks: {
       cacheGroups: {
         commons: {
-          test: /node_modules|vendor/,
+          test: /[\\/]node_modules[\\/]/,
           name: "vendors",
           chunks: "all"
         }

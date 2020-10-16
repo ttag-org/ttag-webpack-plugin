@@ -16,8 +16,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/preset-env": "^7.4.5",
     "local-web-server": "^3.0.0",
-    "ttag-cli": "^1.7.15",
-    "webpack": "^4.33.0"
+    "ttag-cli": "^1.7.15"
   },
   "dependencies": {
     "ttag": "^1.7.15"
