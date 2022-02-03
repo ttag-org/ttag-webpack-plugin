@@ -67,7 +67,7 @@ test("should add vendor chunks from child compilation", async done => {
   });
 
   const stats = await runWebpack(compiler);
-  const chunkNames = stats.compilation.chunks.map(ch => ch.name);
+  const chunkNames = Array.from(stats.compilation.chunks).map(ch => ch.name);
   expect(chunkNames).toContain("vendors-uk");
   done();
 });
