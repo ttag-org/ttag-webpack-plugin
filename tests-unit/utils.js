@@ -42,10 +42,13 @@ export const getCompiler = (ttagPluging, webpackConf = {}) => {
 export const runWebpack = async compiler => {
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
-      if (err || (stats && stats.hasErrors())) {
-        reject(stats.toString("normal"));
+      if (err) {
+        reject(err);
+      } else if (stats && stats.hasErrors()) {
+        reject(new Error(stats.toString("normal")));
+      } else {
+        resolve(stats);
       }
-      resolve(stats);
     });
   });
 };

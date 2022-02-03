@@ -114,3 +114,29 @@ test("original entry should resolve to default", async done => {
   dir.cleanup();
   done();
 });
+
+test("should fail compilation for missing translation", async done => {
+  const dir = await tmp.dir({ unsafeCleanup: true });
+  const plugin = new TtagPlugin({
+    ttag: {
+      resolve: {
+        unresolved: "fail"
+      }
+    },
+    translations: {
+      uk: path.join(__dirname, "./fixtures/entry/entry.uk.po")
+    }
+  });
+
+  const compiler = getCompiler(plugin, {
+    output: { path: dir.path },
+    entry: {
+      entry: path.join(__dirname, "./fixtures/entry/entry3.js")
+    },
+    stats: "none"
+  });
+
+  await expect(runWebpack(compiler)).rejects.toThrow();
+  await dir.cleanup();
+  done();
+});
