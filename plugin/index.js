@@ -135,7 +135,7 @@ class TtagPlugin {
 
   apply(compiler) {
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compiler, callback) => {
-      this.addDefaultResolve(compiler);
+      this.addResolveOpts(compiler);
       callback();
     });
     Object.entries(this.options.translations).forEach(
@@ -187,19 +187,12 @@ class TtagPlugin {
     }
   }
 
-  addResolveOpts(compiler, pofilePath) {
-    const ttagOpts = {
-      ...this.options.ttag,
-      ...{ resolve: { translations: pofilePath } }
-    };
-    setTtagOptions(compiler, ttagOpts);
-  }
-
-  addDefaultResolve(compiler) {
-    const ttagOpts = {
-      ...this.options.ttag,
-      ...{ resolve: { translations: "default" } }
-    };
+  addResolveOpts(compiler, pofilePath = "default") {
+    const ttagOpts = deepcopy(this.options.ttag);
+    if (!ttagOpts.resolve) {
+      ttagOpts.resolve = {};
+    }
+    ttagOpts.resolve.translations = pofilePath;
     setTtagOptions(compiler, ttagOpts);
   }
 }
